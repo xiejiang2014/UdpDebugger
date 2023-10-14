@@ -1,0 +1,80 @@
+<Window
+    x:Class="UdpDebugger.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="ThisMainWindow"
+    Title="UdpDebugger"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid RowDefinitions="Auto,*">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center">IP:</TextBlock>
+            <TextBox
+                x:Name="TextBox_IP"
+                MinWidth="130"
+                Text="{Binding ElementName=ThisMainWindow,
+                               Path=Ip}" />
+
+            <TextBlock
+                Margin="20,0,0,0"
+                VerticalAlignment="Center">
+                端口:
+            </TextBlock>
+
+            <NumericUpDown
+                x:Name="NumericUpDown_Port"
+                MinWidth="70"
+                Increment="1"
+                Maximum="65535"
+                Minimum="1"
+                Value="{Binding ElementName=ThisMainWindow,
+                                Path=Port}" />
+
+
+            <ToggleSwitch
+                x:Name="ToggleSwitch_Connect"
+                Margin="20,0,0,0"
+                IsChecked="{Binding ElementName=ThisMainWindow,
+                                    Path=Connected}"
+                OffContent="已断开"
+                OnContent="已连接" />
+
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center">
+                计数:
+            </TextBlock>
+            <TextBlock
+                MinWidth="50"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Text="{Binding ElementName=ThisMainWindow,
+                               Path=Messages.Count}" />
+
+
+            <Button Click="Button_Clear_OnClick">
+                清除
+            </Button>
+
+
+            <Button
+                Margin="20,0,0,0"
+                Click="Button_Output_OnClick">
+                导出
+            </Button>
+        </StackPanel>
+        <ListBox
+            x:Name="ListBox_Messages"
+            Grid.Row="1"
+            FontFamily="Cascadia Code"
+            ItemsSource="{Binding ElementName=ThisMainWindow,
+                                  Path=Messages}" />
+    </Grid>
+</Window>
