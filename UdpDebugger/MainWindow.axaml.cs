@@ -19,6 +19,16 @@ namespace UdpDebugger
         public MainWindow()
         {
             InitializeComponent();
+
+            //var bytes = new byte[]
+            //            {
+            //                0x58,
+            //                0x85,
+            //                0x99,
+            //                0x3c
+            //            };
+
+            //var f = bytes.BytesToFloatArray();
         }
 
         protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -54,18 +64,25 @@ namespace UdpDebugger
                 else
                 {
                     Disconnect();
-                    
+
                     TextBox_IP.IsEnabled         = true;
                     NumericUpDown_Port.IsEnabled = true;
                 }
             }
         }
 
+
+        public ObservableCollection<DataViewTypes> DataTypes { get; } = new ObservableCollection<DataViewTypes>()
+                                                                        {
+                                                                            DataViewTypes.Hex,
+                                                                            DataViewTypes.Float
+                                                                        };
+
+        public DataViewTypes DataViewType { get; set; } = DataViewTypes.Hex;
+
+
         public ObservableCollection<string> Messages { get; set; } = new();
-        //  {
-        //      "2a , 80 , bc , be , 57 , d4 , 35 , 42 , a8 , e3 , c6 , bf , b2 , f3 , 9a , be , cc , 0c , a6 , be , 97 , 5d , a7 , 40",
-        //      "2i , 8i , 1l , be , 57 , d4 , 35 , 42 , a8 , e3 , c6 , bf , b2 , f3 , 9a , be , cc , 0c , a6 , be , 97 , 5d , a7 , 40",
-        //  };
+
 
         private void Connect()
         {
@@ -99,7 +116,15 @@ namespace UdpDebugger
 
             _udpClient.BeginReceive(DataReceived, null);
 
-            Messages.Add(receiveBytes.BytesToString());
+
+            if (DataViewType == DataViewTypes.Hex)
+            {
+                Messages.Add(receiveBytes.BytesToString());
+            }
+            else if (DataViewType == DataViewTypes.Float)
+            {
+                Messages.Add(string.Join(",", receiveBytes.BytesToFloatArray()));
+            }
 
             Dispatcher.UIThread.Post(() => ListBox_Messages.ScrollIntoView(Messages.Count - 1),
                                      DispatcherPriority.Background);
@@ -163,5 +188,12 @@ namespace UdpDebugger
                 }
             }
         }
+    }
+
+
+    public enum DataViewTypes
+    {
+        Hex,
+        Float
     }
 }

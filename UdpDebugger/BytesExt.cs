@@ -36,6 +36,33 @@ public static class BytesExt
     }
 
 
+    public static float[] BytesToFloatArray
+    (
+        this byte[] bytes
+    )
+    {
+        if (bytes.Length == 0)
+        {
+            return Array.Empty<float>();
+        }
+
+        if (bytes.Length % 4 != 0)
+        {
+            throw new ArgumentException("字节数组的长度不是4的整数倍");
+        }
+
+        var result = new float[bytes.Length / 4];
+
+
+        for (int i = 0, j = 0; i < bytes.Length; i += 4, j++)
+        {
+            result[j] = BitConverter.ToSingle(bytes, i);
+        }
+
+        return result;
+    }
+
+
     public static short BytesToShort
     (
         this byte[] bytes
