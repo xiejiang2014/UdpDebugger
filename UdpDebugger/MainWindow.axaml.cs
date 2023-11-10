@@ -20,16 +20,10 @@ namespace UdpDebugger
         {
             InitializeComponent();
 
-            //var bytes = new byte[]
-            //            {
-            //                0x58,
-            //                0x85,
-            //                0x99,
-            //                0x3c
-            //            };
-
-            //var f = bytes.BytesToFloatArray();
+            _autoUdpClient.DataReceived  += _autoUdpClient_DataReceived;
+            _autoUdpClient.ErrorChanged += AutoUdpClientErrorChanged;
         }
+
 
         protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
         {
@@ -39,11 +33,9 @@ namespace UdpDebugger
         }
 
 
-        private UdpClient?  _udpClient;
-        private IPEndPoint? _ipEndPoint;
-
-        public string Ip   { get; set; } = "127.0.0.1";
-        public int    Port { get; set; } = 10000;
+        private AutoUdpClient _autoUdpClient = new();
+        public  string        Ip   { get; set; } = "127.0.0.1";
+        public  int           Port { get; set; } = 10000;
 
         private bool _connected;
 
@@ -88,10 +80,9 @@ namespace UdpDebugger
         {
             try
             {
-                _udpClient  = new UdpClient(Port);
-                _ipEndPoint = new IPEndPoint(IPAddress.Any, Port);
-
-                _udpClient.BeginReceive(DataReceived, null);
+                _autoUdpClient.LocalIp   = Ip;
+                _autoUdpClient.LocalPort = Port;
+                _autoUdpClient.Start();
             }
             catch (Exception e)
             {
@@ -100,23 +91,8 @@ namespace UdpDebugger
             }
         }
 
-        private void DataReceived(IAsyncResult ar)
+        private void _autoUdpClient_DataReceived(object? sender, byte[] receiveBytes)
         {
-            if (_udpClient is null || Connected == false)
-            {
-                return;
-            }
-
-            var receiveBytes = _udpClient.EndReceive
-                (
-                 ar,
-                 ref _ipEndPoint
-                );
-
-
-            _udpClient.BeginReceive(DataReceived, null);
-
-
             if (DataViewType == DataViewTypes.Hex)
             {
                 Messages.Add(receiveBytes.BytesToString());
@@ -130,21 +106,14 @@ namespace UdpDebugger
                                      DispatcherPriority.Background);
         }
 
+        private void AutoUdpClientErrorChanged(object? sender, string e)
+        {
+            Dispatcher.UIThread.Post(() => TextBlockErrorMessage.Text = e);
+        }
+
         private void Disconnect()
         {
-            if (_udpClient is null)
-            {
-                return;
-            }
-
-            try
-            {
-                _udpClient.Close();
-                _udpClient = null;
-            }
-            catch (Exception e)
-            {
-            }
+            _autoUdpClient.Stop();
         }
 
         private void Button_Clear_OnClick(object? sender, RoutedEventArgs e)

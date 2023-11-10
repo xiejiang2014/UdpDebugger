@@ -9,7 +9,7 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*,Auto">
         <StackPanel Orientation="Horizontal">
             <TextBlock VerticalAlignment="Center">IP:</TextBlock>
             <TextBox
@@ -85,5 +85,8 @@
             FontFamily="Cascadia Code"
             ItemsSource="{Binding ElementName=ThisMainWindow,
                                   Path=Messages}" />
+
+
+        <TextBlock x:Name="TextBlockErrorMessage" Grid.Row="2" ></TextBlock>
     </Grid>
 </Window>
