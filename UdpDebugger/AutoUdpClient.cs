@@ -26,46 +26,17 @@ namespace UdpDebugger
         public bool IsWorking { get; private set; }
 
 
-        public AutoUdpClient()
-        {
-            InitTimer();
-        }
+        //public AutoUdpClient()
+        //{
+        //    InitTimer();
+        //}
 
-        #region 连接状态 & 检测
+        #region 连接状态
 
         public bool IsConnected { get; set; }
 
-        private uint _recvCount       = 0;
-        private uint _recvCountBackup = 0;
-
         #endregion
 
-
-        #region 连接检测
-
-        private readonly Timer _timer = new(1000);
-
-        private void InitTimer()
-        {
-            _timer.Elapsed += TimerElapsed;
-            _timer.Start();
-        }
-
-        private void TimerElapsed(object? sender, ElapsedEventArgs e)
-        {
-            if (_recvCount > _recvCountBackup)
-            {
-                IsConnected = true;
-            }
-            else
-            {
-                IsConnected = false;
-            }
-
-            _recvCountBackup = _recvCount;
-        }
-
-        #endregion
 
         private string _errorMessage = string.Empty;
 
@@ -175,8 +146,12 @@ namespace UdpDebugger
                 }
                 else // 超时
                 {
-                    IsConnected  = false;
-                    ErrorMessage = "接收超时";
+                    IsConnected = false;
+                    if (IsWorking)
+                    {
+                        ErrorMessage = "接收超时";
+                    }
+
                     break;
                 }
             }
