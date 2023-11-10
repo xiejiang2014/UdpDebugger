@@ -25,12 +25,6 @@ namespace UdpDebugger
 
         public bool IsWorking { get; private set; }
 
-
-        //public AutoUdpClient()
-        //{
-        //    InitTimer();
-        //}
-
         #region 连接状态
 
         public bool IsConnected { get; set; }
