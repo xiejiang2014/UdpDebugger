@@ -9,5 +9,11 @@
         <!--<StyleInclude Source="avares://Semi.Avalonia/Themes/Index.axaml" />-->
     </Application.Styles>
 
+    <Application.Resources>
+        <!--<FontFamily x:Key="SourceHanSansCN-Normal">avares://UdpDebugger/SourceHanSansCN-Normal.otf#SourceHanSansCN-Normal-Alphabetic</FontFamily>-->
 
+        <!--<FontFamily  x:Key="FZLanTingHeiSLGB">avares://UdpDebugger/Assets/FZLanTingHeiS-L-GB.ttf#FZLanTingHeiS-L-GB</FontFamily>-->
+
+
+    </Application.Resources>
 </Application>

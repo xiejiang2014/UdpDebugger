@@ -6,23 +6,30 @@
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-		<AssemblyVersion>1.0.23314.1834</AssemblyVersion>
-		<FileVersion>1.0.23314.1834</FileVersion>
+		<AssemblyVersion>1.0.23322.1825</AssemblyVersion>
+		<FileVersion>1.0.23322.1825</FileVersion>
 
 		<PublishTrimmed>true</PublishTrimmed>
 		<TrimMode>full</TrimMode>
 		<RunAOTCompilation>true</RunAOTCompilation>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="FZLanTingHeiS-L-GB.TTF" />
+	  <None Remove="SourceHanSansCN-Normal.otf" />
+	</ItemGroup>
+	<ItemGroup>
+	  <AvaloniaResource Include="Assets\FZLanTingHeiS-L-GB.TTF" />
+	</ItemGroup>
 
 
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.0.0" />
-		<PackageReference Include="Avalonia.Desktop" Version="11.0.0" />
-		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0" />
-		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.0" />
+		<PackageReference Include="Avalonia" Version="11.0.5" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.5" />
+		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.5" />
 		<!--<PackageReference Include="Semi.Avalonia" Version="11.0.1" />-->
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.0" />
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.5" />
 	</ItemGroup>
 </Project>

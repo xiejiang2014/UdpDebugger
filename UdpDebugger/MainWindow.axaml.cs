@@ -157,6 +157,14 @@ namespace UdpDebugger
                 }
             }
         }
+
+        private void MenuItem_OnClick(object? sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem {DataContext: string text})
+            {
+                Clipboard?.SetTextAsync(text);
+            }
+        }
     }
 
 

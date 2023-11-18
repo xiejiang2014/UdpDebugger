@@ -2,7 +2,6 @@
 using System.Net.Sockets;
 using System.Net;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace UdpDebugger
 {
