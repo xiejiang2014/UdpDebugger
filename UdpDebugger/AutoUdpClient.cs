@@ -47,7 +47,7 @@ namespace UdpDebugger
 
         private UdpClient? _udpClient = null;
 
-        public void Start()
+        public void Connect()
         {
             if (IsWorking)
             {
@@ -102,10 +102,10 @@ namespace UdpDebugger
 
                 _udpClient = new UdpClient(localEndPoint);
 
-                if (!string.IsNullOrWhiteSpace(RemoteIp))
-                {
-                    _udpClient.Connect(RemoteIp, RemotePort);
-                }
+                //if (!string.IsNullOrWhiteSpace(RemoteIp))
+                //{
+                //    _udpClient.Connect(RemoteIp, RemotePort);
+                //}
             }
         }
 
@@ -113,19 +113,37 @@ namespace UdpDebugger
         {
             while (IsWorking && jobId == _jobId && _udpClient != null)
             {
+                //if (_udpClient is not null)
+                //{
+                //    var udpReceiveResult = await _udpClient.ReceiveAsync();
+                //    IsConnected  = true;
+                //    ErrorMessage = string.Empty;
+                //    try
+                //    {
+                //        DataReceived?.Invoke(this, udpReceiveResult.Buffer);
+                //    }
+                //    catch (Exception e)
+                //    {
+                //        // ignored
+                //    }
+                //}
+
+
+                //=====================================================================================
+
                 Task<UdpReceiveResult> receiveTask;
                 lock (_reloadingLock)
                 {
                     receiveTask = _udpClient.ReceiveAsync();
                 }
 
-                var timeoutTask   = Task.Delay(TimeoutInMilliseconds);
+                var timeoutTask = Task.Delay(TimeoutInMilliseconds);
                 var completedTask = await Task.WhenAny(receiveTask, timeoutTask);
 
                 if (completedTask == receiveTask)
                 {
                     var udpReceiveResult = receiveTask.Result;
-                    IsConnected  = true;
+                    IsConnected = true;
                     ErrorMessage = string.Empty;
 
                     try
@@ -150,11 +168,26 @@ namespace UdpDebugger
             }
         }
 
-
-        public void Stop()
+        public void Disconnect()
         {
             IsWorking    = false;
             ErrorMessage = string.Empty;
+        }
+
+
+        public void SendData(byte[] data)
+        {
+            if (IsWorking)
+            {
+                lock (_reloadingLock)
+                {
+                    _udpClient?.Send(data, data.Length,RemoteIp,RemotePort);
+                }
+            }
+            else
+            {
+                throw new ApplicationException("处于非工作模式,无法发送数据.");
+            }
         }
     }
 }

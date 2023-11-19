@@ -6,6 +6,27 @@ namespace UdpDebugger;
 
 public static class BytesExt
 {
+    /// <summary>
+    /// 将逗号分割的一组16进制字符串值还原为byte数组.
+    /// 例"f3 , b3 , 1a , 44 , ea , e7 , 19 , 44"=>
+    /// </summary>
+    /// <param name="hexString"></param>
+    /// <returns></returns>
+    public static byte[] HexStringToBytes(this string hexString)
+    {
+        var hexValues = hexString.Split(',');
+
+        var byteArray = new byte[hexValues.Length];
+
+        for (var i = 0; i < hexValues.Length; i++)
+        {
+            var value = Convert.ToByte(hexValues[i].Trim(), 16);
+            byteArray[i] = value;
+        }
+
+        return byteArray;
+    }
+
     public static string BytesToString
     (
         this IEnumerable<byte> bytes
@@ -35,7 +56,6 @@ public static class BytesExt
         return debugString;
     }
 
-
     public static float[] BytesToFloatArray
     (
         this byte[] bytes
@@ -61,7 +81,6 @@ public static class BytesExt
 
         return result;
     }
-
 
     public static short BytesToShort
     (
@@ -100,5 +119,24 @@ public static class BytesExt
         src[1] = (byte)((value >> 8) & 0xFF);
         src[0] = (byte)(value        & 0xFF);
         return src;
+    }
+
+
+    /// <summary>
+    /// 大小端转换 0x01 0x02 0x03 0x04  -> 0x02 0x01 0x04 0x03
+    /// </summary>
+    /// <param name="dataBytes"></param>
+    public static void EndianConvert(this byte[] dataBytes)
+    {
+        if (dataBytes.Length == 4)
+        {
+            var t = dataBytes[0];
+            dataBytes[0] = dataBytes[1];
+            dataBytes[1] = t;
+
+            t            = dataBytes[2];
+            dataBytes[2] = dataBytes[3];
+            dataBytes[3] = t;
+        }
     }
 }

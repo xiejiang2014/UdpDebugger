@@ -1,8 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
+using System.Timers;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
@@ -20,7 +19,7 @@ namespace UdpDebugger
         {
             InitializeComponent();
 
-            _autoUdpClient.DataReceived  += _autoUdpClient_DataReceived;
+            _autoUdpClient.DataReceived += _autoUdpClient_DataReceived;
             _autoUdpClient.ErrorChanged += AutoUdpClientErrorChanged;
         }
 
@@ -33,9 +32,11 @@ namespace UdpDebugger
         }
 
 
-        private AutoUdpClient _autoUdpClient = new();
-        public  string        Ip   { get; set; } = "127.0.0.1";
-        public  int           Port { get; set; } = 10000;
+        private readonly AutoUdpClient _autoUdpClient = new();
+        public           string        LocalIp    { get; set; } = "127.0.0.1";
+        public           int           LocalPort  { get; set; } = 10000;
+        public           string        RemoteIp   { get; set; } = "127.0.0.1";
+        public           int           RemotePort { get; set; } = 10000;
 
         private bool _connected;
 
@@ -50,15 +51,19 @@ namespace UdpDebugger
                 {
                     Connect();
 
-                    TextBox_IP.IsEnabled         = false;
-                    NumericUpDown_Port.IsEnabled = false;
+                    TextBox_LocalIP.IsEnabled          = false;
+                    NumericUpDown_LocalPort.IsEnabled  = false;
+                    TextBox_RemoteIp.IsEnabled         = false;
+                    NumericUpDown_RemotePort.IsEnabled = false;
                 }
                 else
                 {
                     Disconnect();
 
-                    TextBox_IP.IsEnabled         = true;
-                    NumericUpDown_Port.IsEnabled = true;
+                    TextBox_LocalIP.IsEnabled          = true;
+                    NumericUpDown_LocalPort.IsEnabled  = true;
+                    TextBox_RemoteIp.IsEnabled         = true;
+                    NumericUpDown_RemotePort.IsEnabled = true;
                 }
             }
         }
@@ -73,16 +78,18 @@ namespace UdpDebugger
         public DataViewTypes DataViewType { get; set; } = DataViewTypes.Hex;
 
 
-        public ObservableCollection<string> Messages { get; set; } = new();
+        public ObservableCollection<string> ReceivedMessages { get; set; } = new();
 
 
         private void Connect()
         {
             try
             {
-                _autoUdpClient.LocalIp   = Ip;
-                _autoUdpClient.LocalPort = Port;
-                _autoUdpClient.Start();
+                _autoUdpClient.LocalIp    = LocalIp;
+                _autoUdpClient.LocalPort  = LocalPort;
+                _autoUdpClient.RemoteIp   = RemoteIp;
+                _autoUdpClient.RemotePort = RemotePort;
+                _autoUdpClient.Connect();
             }
             catch (Exception e)
             {
@@ -95,14 +102,14 @@ namespace UdpDebugger
         {
             if (DataViewType == DataViewTypes.Hex)
             {
-                Messages.Add(receiveBytes.BytesToString());
+                ReceivedMessages.Add(receiveBytes.BytesToString());
             }
             else if (DataViewType == DataViewTypes.Float)
             {
-                Messages.Add(string.Join(",", receiveBytes.BytesToFloatArray()));
+                ReceivedMessages.Add(string.Join(",", receiveBytes.BytesToFloatArray()));
             }
 
-            Dispatcher.UIThread.Post(() => ListBox_Messages.ScrollIntoView(Messages.Count - 1),
+            Dispatcher.UIThread.Post(() => ListBoxReceivedMessages.ScrollIntoView(ReceivedMessages.Count - 1),
                                      DispatcherPriority.Background);
         }
 
@@ -113,12 +120,12 @@ namespace UdpDebugger
 
         private void Disconnect()
         {
-            _autoUdpClient.Stop();
+            _autoUdpClient.Disconnect();
         }
 
         private void Button_Clear_OnClick(object? sender, RoutedEventArgs e)
         {
-            Messages.Clear();
+            ReceivedMessages.Clear();
         }
 
         private async void Button_Output_OnClick(object? sender, RoutedEventArgs e)
@@ -151,20 +158,110 @@ namespace UdpDebugger
                 await using var streamWriter = new StreamWriter(stream);
                 // Write some content to the file.
 
-                for (var i = 0; i < Messages.Count; i++)
+                for (var i = 0; i < ReceivedMessages.Count; i++)
                 {
-                    await streamWriter.WriteLineAsync(Messages[i]);
+                    await streamWriter.WriteLineAsync(ReceivedMessages[i]);
                 }
             }
         }
 
         private void MenuItem_OnClick(object? sender, RoutedEventArgs e)
         {
-            if (sender is MenuItem {DataContext: string text})
+            if (sender is MenuItem { DataContext: string text })
             {
                 Clipboard?.SetTextAsync(text);
             }
         }
+
+        #region 发送
+
+        public ObservableCollection<string> SendMessages { get; set; } = new();
+
+        private void Button_OnClick(object? sender, RoutedEventArgs e)
+        {
+            Send();
+        }
+
+        private Timer? _timer;
+
+        private void CheckBox_KeepSending_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
+        {
+            if (CheckBox_KeepSending.IsChecked.GetValueOrDefault(false))
+            {
+                if (_timer == null)
+                {
+                    _timer         =  new Timer();
+                    _timer.Elapsed += _timer_Elapsed;
+                }
+
+                _timer.Interval = (double)NumericUpDown_Intervals.Value!;
+                _timer.Start();
+            }
+            else
+            {
+                _timer?.Stop();
+            }
+        }
+
+        private void _timer_Elapsed(object? sender, ElapsedEventArgs e)
+        {
+            Send();
+        }
+
+        private void Send()
+        {
+            var sendText = string.Empty;
+
+
+            Dispatcher.UIThread.Invoke(() => sendText = TextBoxSend.Text,
+                                       DispatcherPriority.Input);
+
+            if (string.IsNullOrWhiteSpace(sendText))
+            {
+                return;
+            }
+
+            if (!_autoUdpClient.IsWorking)
+            {
+                return;
+            }
+
+            try
+            {
+                var sendBytes = Array.Empty<byte>();
+                try
+                {
+                    sendBytes = sendText.HexStringToBytes();
+                }
+                catch (Exception e)
+                {
+                    sendText = "数据格式错误,无法将其转换为字节数组.";
+                }
+
+                if (sendBytes.Length > 0)
+                {
+                    _autoUdpClient?.SendData(sendBytes);
+                }
+                
+                Dispatcher.UIThread.Post(() =>
+                                         {
+                                             //SendMessages.Add(sendText);
+                                             //ListBoxSendMessages.ScrollIntoView(SendMessages.Count - 1);
+                                         },
+                                         DispatcherPriority.Background);
+            }
+            catch (Exception e)
+            {
+                Dispatcher.UIThread.Post(() =>
+                                         {
+                                             //SendMessages.Add($"数据发送出错{e.Message}");
+                                             //ListBoxSendMessages.ScrollIntoView(SendMessages.Count - 1);
+                                         },
+                                         DispatcherPriority.Background);
+            }
+        }
+
+        #endregion
     }
 
 
