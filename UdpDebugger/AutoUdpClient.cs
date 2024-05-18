@@ -15,8 +15,8 @@ namespace UdpDebugger
         public int    LocalPort { get; set; }
 
 
-        public string RemoteIp   { get; set; } = string.Empty;
-        public int    RemotePort { get; set; }
+        public IPAddress RemoteIp   { get; set; } = IPAddress.Any;
+        public int       RemotePort { get; set; }
 
         public event EventHandler<byte[]>? DataReceived;
         public event EventHandler<string>? ErrorChanged;
@@ -97,8 +97,10 @@ namespace UdpDebugger
                     _udpClient = null;
                 }
 
-                var localIpAddress = string.IsNullOrWhiteSpace(LocalIp) ? IPAddress.Any : IPAddress.Parse(LocalIp);
-                var localEndPoint  = new IPEndPoint(localIpAddress, LocalPort);
+                var localIpAddress = string.IsNullOrWhiteSpace(LocalIp)
+                    ? IPAddress.Any
+                    : IPAddress.Parse(LocalIp);
+                var localEndPoint = new IPEndPoint(localIpAddress, LocalPort);
 
                 _udpClient = new UdpClient(localEndPoint);
 
@@ -137,13 +139,13 @@ namespace UdpDebugger
                     receiveTask = _udpClient.ReceiveAsync();
                 }
 
-                var timeoutTask = Task.Delay(TimeoutInMilliseconds);
+                var timeoutTask   = Task.Delay(TimeoutInMilliseconds);
                 var completedTask = await Task.WhenAny(receiveTask, timeoutTask);
 
                 if (completedTask == receiveTask)
                 {
                     var udpReceiveResult = receiveTask.Result;
-                    IsConnected = true;
+                    IsConnected  = true;
                     ErrorMessage = string.Empty;
 
                     try
@@ -181,7 +183,7 @@ namespace UdpDebugger
             {
                 lock (_reloadingLock)
                 {
-                    _udpClient?.Send(data, data.Length,RemoteIp,RemotePort);
+                    _udpClient?.Send(data, data.Length, RemoteIp.ToString(), RemotePort);
                 }
             }
             else

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
@@ -9,10 +9,17 @@
 		<AssemblyVersion>1.0.23322.2350</AssemblyVersion>
 		<FileVersion>1.0.23322.2350</FileVersion>
 
+		<PublishAot>true</PublishAot>
+		<OptimizationPreference>Speed</OptimizationPreference>
 		<PublishTrimmed>true</PublishTrimmed>
-		<TrimMode>full</TrimMode>
 		<RunAOTCompilation>true</RunAOTCompilation>
 	</PropertyGroup>
+	<ItemGroup>
+	  <AvaloniaXaml Remove="publish\**" />
+	  <Compile Remove="publish\**" />
+	  <EmbeddedResource Remove="publish\**" />
+	  <None Remove="publish\**" />
+	</ItemGroup>
 	<ItemGroup>
 	  <None Remove="FZLanTingHeiS-L-GB.TTF" />
 	  <None Remove="SourceHanSansCN-Normal.otf" />
@@ -21,15 +28,26 @@
 	  <AvaloniaResource Include="Assets\FZLanTingHeiS-L-GB.TTF" />
 	</ItemGroup>
 
-
+	<ItemGroup>
+		<RdXmlFile Include="rd.xml" />
+	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.0.5" />
-		<PackageReference Include="Avalonia.Desktop" Version="11.0.5" />
-		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.5" />
-		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.5" />
-		<!--<PackageReference Include="Semi.Avalonia" Version="11.0.1" />-->
+		<PackageReference Include="Avalonia" Version="11.0.10" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.10" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10" />
+		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10" />		<PackageReference Include="Irihi.Ursa" Version="0.3.0-beta20240518" />		<PackageReference Include="Irihi.Ursa.Themes.Semi" Version="0.3.0-beta20240518" />		<PackageReference Include="Prism.Core" Version="8.1.97" />
+
+		<PackageReference Include="Semi.Avalonia" Version="11.0.7.3" />
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.5" />
+		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.10" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PrivateSdkAssemblies Remove="publish\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <FrameworkAssemblies Remove="publish\**" />
 	</ItemGroup>
 </Project>

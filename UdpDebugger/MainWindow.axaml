@@ -4,46 +4,42 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:u="https://irihi.tech/ursa"
+    xmlns:udpDebugger="clr-namespace:UdpDebugger"
     x:Name="ThisMainWindow"
     Title="UdpDebugger"
-    d:DesignHeight="450"
     Padding="10"
+    d:DesignHeight="450"
     d:DesignWidth="1200"
+    x:DataType="udpDebugger:MainWindowViewModel"
     mc:Ignorable="d">
+
     <Grid RowDefinitions="Auto,*,Auto">
         <StackPanel Orientation="Horizontal">
-            <TextBlock VerticalAlignment="Center">本地 IP:</TextBlock>
-            <TextBox
-                x:Name="TextBox_LocalIP"
-                MinWidth="130"
-                Text="{Binding ElementName=ThisMainWindow,
-                               Path=LocalIp}" />
-
-            <TextBlock
-                Margin="4,0,0,0"
-                VerticalAlignment="Center">
-                端口:
-            </TextBlock>
+            <TextBlock VerticalAlignment="Center">本地 端口:</TextBlock>
 
             <NumericUpDown
-                x:Name="NumericUpDown_LocalPort"
                 MinWidth="70"
                 Increment="1"
+                IsEnabled="{Binding !Connected}"
                 Maximum="65535"
                 Minimum="1"
-                Value="{Binding ElementName=ThisMainWindow,
-                                Path=LocalPort}" />
+                ParsingNumberStyle="Integer"
+                Value="{Binding Path=LocalPort}" />
 
 
             <TextBlock
-                Margin="20,0,0,0" VerticalAlignment="Center">
+                Margin="20,0,0,0"
+                VerticalAlignment="Center">
                 远程 IP:
             </TextBlock>
-            <TextBox
-                x:Name="TextBox_RemoteIp"
-                MinWidth="130"
-                Text="{Binding ElementName=ThisMainWindow,
-                               Path=RemoteIp}" />
+
+            <u:IPv4Box
+                Width="200"
+                IPAddress="{Binding RemoteIp}"
+                InputMode="Fast"
+                IsEnabled="{Binding !Connected}"
+                ShowLeadingZero="False" />
 
             <TextBlock
                 Margin="4,0,0,0"
@@ -52,30 +48,26 @@
             </TextBlock>
 
             <NumericUpDown
-                x:Name="NumericUpDown_RemotePort"
                 MinWidth="70"
                 Increment="1"
+                IsEnabled="{Binding !Connected}"
                 Maximum="65535"
                 Minimum="1"
-                Value="{Binding ElementName=ThisMainWindow,
-                                Path=RemotePort}" />
+                ParsingNumberStyle="Integer"
+                Value="{Binding Path=RemotePort}" />
 
 
             <ToggleSwitch
-                x:Name="ToggleSwitch_Connect"
                 Margin="20,0,0,0"
-                IsChecked="{Binding ElementName=ThisMainWindow,
-                                    Path=Connected}"
+                IsChecked="{Binding Path=Connected}"
                 OffContent="已断开"
                 OnContent="已连接" />
 
 
             <ComboBox
                 Margin="20,0,0,0"
-                ItemsSource="{Binding ElementName=ThisMainWindow,
-                                      Path=DataTypes}"
-                SelectedItem="{Binding ElementName=ThisMainWindow,
-                                       Path=DataViewType}" />
+                ItemsSource="{Binding Path=DataTypes}"
+                SelectedItem="{Binding Path=DataViewType}" />
 
 
         </StackPanel>
@@ -86,35 +78,39 @@
             Orientation="Horizontal">
 
 
-            <Button Click="Button_Clear_OnClick">
+            <Button Command="{Binding ClearCommand}">
                 清除
             </Button>
 
 
             <Button
                 Margin="20,0,0,0"
-                Click="Button_Output_OnClick">
+                Command="{Binding OutputCommand}">
                 导出
             </Button>
         </StackPanel>
 
-        <TabControl Grid.Row="1" Margin="0" Padding ="0">
+        <TabControl
+            Grid.Row="1"
+            Margin="0"
+            Padding="0">
             <TabItem Header="接收">
                 <ListBox
-                    Scroll=""
-                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
                     x:Name="ListBoxReceivedMessages"
                     FontFamily="Cascadia Code"
-                    ItemsSource="{Binding ElementName=ThisMainWindow,
-                                  Path=ReceivedMessages}">
+                    ItemsSource="{Binding Path=ReceivedMessages}"
+                    Scroll=""
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                     <ListBox.Styles>
                         <Style Selector="ListBoxItem">
                             <Setter Property="ContextMenu">
                                 <Setter.Value>
                                     <ContextMenu>
-                                        <MenuItem Header="复制" Click="MenuItem_OnClick"
-                                                  FontFamily="{StaticResource FZLanTingHeiSLGB}" />
+                                        <MenuItem
+                                            Click="MenuItem_OnClick"
+                                            FontFamily="{StaticResource FZLanTingHeiSLGB}"
+                                            Header="复制" />
                                     </ContextMenu>
                                 </Setter.Value>
                             </Setter>
@@ -124,46 +120,60 @@
             </TabItem>
 
             <TabItem Header="发送">
-                <Grid RowDefinitions="Auto,*">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBox          FontFamily="Cascadia Code" AcceptsReturn="True" x:Name="TextBoxSend" Grid.RowSpan="3" />
-                        <StackPanel Margin="10,0,0,0" Grid.Column="1" Orientation="Vertical">
-                            <Button VerticalAlignment="Stretch"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center"
-                                    VerticalContentAlignment="Center"
-                                    Click="Button_OnClick">
-                                发送
-                            </Button>
-                            <CheckBox IsCheckedChanged="CheckBox_KeepSending_OnIsCheckedChanged"
-                                      x:Name="CheckBox_KeepSending" Margin="0,8,0,0">
-                                持续发送
-                            </CheckBox>
-                            <TextBlock>间隔时间(ms):</TextBlock>
-                            <NumericUpDown Value="10" x:Name="NumericUpDown_Intervals"
-                                           IsEnabled="{Binding ElementName=CheckBox_KeepSending,Path=!IsChecked}"
-                                           MinWidth="130" Margin="0,8,0,0" />
-                        </StackPanel>
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <TextBox
+                        x:Name="TextBoxSend"
+                        Height="200"
+                        AcceptsReturn="True"
+                        FontFamily="Cascadia Code"
+                        Text="{Binding SendingText}" />
 
 
-                    </Grid>
+                    <StackPanel
+                        Grid.Row="1"
+                        Margin="10,0,0,0"
+                        Orientation="Horizontal">
+                        <Button
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Command="{Binding SendCommand}">
+                            发送
+                        </Button>
+                        <CheckBox
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            IsChecked="{Binding KeepSending}">
+                            持续发送
+                        </CheckBox>
+                        <TextBlock VerticalAlignment="Center">间隔时间(ms):</TextBlock>
+                        <NumericUpDown
+                            MinWidth="130"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            Value="{Binding KeepSendingIntervals}" />
+                    </StackPanel>
+
 
                     <ListBox
-                        Margin="0,10,0,0"
-                        Grid.Row="1" Scroll=""
-                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
                         x:Name="ListBoxSendMessages"
+                        Grid.Row="2"
+                        Margin="0,10,0,0"
                         FontFamily="Cascadia Code"
-                        ItemsSource="{Binding ElementName=ThisMainWindow,
-                                  Path=SendMessages}">
+                        ItemsSource="{Binding Path=SendMessages}"
+                        Scroll=""
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto">
 
                         <ListBox.Styles>
                             <Style Selector="ListBoxItem">
                                 <Setter Property="ContextMenu">
                                     <Setter.Value>
                                         <ContextMenu>
-                                            <MenuItem Header="复制" Click="MenuItem_OnClick"
-                                                      FontFamily="{StaticResource FZLanTingHeiSLGB}" />
+                                            <MenuItem
+                                                Click="MenuItem_OnClick"
+                                                FontFamily="{StaticResource FZLanTingHeiSLGB}"
+                                                Header="复制" />
                                         </ContextMenu>
                                     </Setter.Value>
                                 </Setter>
@@ -177,8 +187,8 @@
         </TabControl>
 
         <StackPanel
-            Margin="0,10,0,0"
             Grid.Row="2"
+            Margin="0,10,0,0"
             HorizontalAlignment="Left"
             Orientation="Horizontal">
 
@@ -190,10 +200,13 @@
                 MinWidth="50"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                Text="{Binding ElementName=ThisMainWindow,
-                               Path=ReceivedMessages.Count}" />
+                Text="{Binding Path=ReceivedMessages.Count}" />
 
-            <TextBlock Margin="20,0,0,0" x:Name="TextBlockErrorMessage" Grid.Row="2" />
+            <TextBlock
+                x:Name="TextBlockErrorMessage"
+                Grid.Row="2"
+                Margin="20,0,0,0"
+                Text="{Binding Path=ErrorMessage}" />
         </StackPanel>
     </Grid>
 </Window>
