@@ -52,6 +52,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Include="..\..\xiejiang.CommonModule\AutoUdpClient.cs" Link="AutoUdpClient.cs" />
+	  <Compile Include="..\..\..\MyRepository\xiejiang.CommonModule\AutoUdpClient.cs" Link="AutoUdpClient.cs" />
 	</ItemGroup>
+
 </Project>
