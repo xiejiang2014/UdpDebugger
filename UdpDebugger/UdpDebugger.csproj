@@ -50,4 +50,8 @@
 	<ItemGroup>
 	  <FrameworkAssemblies Remove="publish\**" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Include="..\..\xiejiang.CommonModule\AutoUdpClient.cs" Link="AutoUdpClient.cs" />
+	</ItemGroup>
 </Project>

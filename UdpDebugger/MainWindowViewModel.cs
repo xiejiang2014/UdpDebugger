@@ -71,7 +71,7 @@ namespace UdpDebugger
                 _autoUdpClient.LocalPort  = LocalPort;
                 _autoUdpClient.RemoteIp   = RemoteIp;
                 _autoUdpClient.RemotePort = RemotePort;
-                _autoUdpClient.Connect();
+                _autoUdpClient.StartTryingConnect();
             }
             catch (Exception e)
             {
