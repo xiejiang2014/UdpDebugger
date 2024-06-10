@@ -19,41 +19,6 @@ namespace UdpDebugger
     {
         private readonly AutoUdpClient _autoUdpClient = new();
 
-        public MainWindowViewModel()
-        {
-            _autoUdpClient.DataReceived += AutoUdpClient_DataReceived;
-            _autoUdpClient.ErrorChanged += AutoUdpClient_ErrorChanged;
-        }
-
-        public string ErrorMessage { get; set; }
-
-        public IPAddress LocalIp   { get; set; } = IPAddress.Parse("127.0.0.1");
-        public int       LocalPort  { get; set; } = 10000;
-        public IPAddress RemoteIp   { get; set; } = IPAddress.Parse("127.0.0.1");
-        public int       RemotePort { get; set; } = 10000;
-
-        private bool _connected;
-
-        public bool Connected
-        {
-            get => _connected;
-            set
-            {
-                _connected = value;
-
-                if (value)
-                {
-                    Connect();
-                }
-                else
-                {
-                    Disconnect();
-                }
-
-                OnPropertyChanged();
-            }
-        }
-
 
         public ObservableCollection<DataViewTypes> DataTypes { get; } =
         [
@@ -64,10 +29,34 @@ namespace UdpDebugger
         public DataViewTypes DataViewType { get; set; } = DataViewTypes.Hex;
 
 
-        public ObservableCollection<string> ReceivedMessages { get; set; } = new();
+        public string ErrorMessage { get; set; }
+
+        public MainWindowViewModel()
+        {
+            _autoUdpClient.DataReceived += AutoUdpClient_DataReceived;
+            _autoUdpClient.ErrorChanged += AutoUdpClient_ErrorChanged;
+            _autoUdpClient.Connected    += AutoUdpClient_Connected;
+            _autoUdpClient.Disconnected += AutoUdpClient_Disconnected;
+            _autoUdpClient.Opened       += AutoUdpClient_Opened;
+            _autoUdpClient.Closed       += AutoUdpClient_Closed;
+        }
 
 
-        private void Connect()
+        #region 连接与断开
+
+        public IPAddress LocalIp    { get; set; } = IPAddress.Parse("127.0.0.1");
+        public int       LocalPort  { get; set; } = 10000;
+        public IPAddress RemoteIp   { get; set; } = IPAddress.Parse("127.0.0.1");
+        public int       RemotePort { get; set; } = 10000;
+
+
+        public bool IsConnected => _autoUdpClient.IsConnected;
+        public bool IsOpened    => _autoUdpClient.IsOpened;
+
+        private DelegateCommand? _startTryingConnectCommand;
+        public  DelegateCommand  StartTryingConnectCommand => _startTryingConnectCommand ??= new DelegateCommand(StartTryingConnect);
+
+        private void StartTryingConnect()
         {
             try
             {
@@ -80,9 +69,43 @@ namespace UdpDebugger
             catch (Exception e)
             {
                 Helper.Manager?.Show(new Notification("开启udp失败", e.Message, NotificationType.Error));
-                Connected = false;
             }
         }
+
+
+        private void AutoUdpClient_Closed(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(IsOpened));
+        }
+
+        private void AutoUdpClient_Opened(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(IsOpened));
+        }
+
+
+        private void AutoUdpClient_Connected(object? sender, byte[] e)
+        {
+            OnPropertyChanged(nameof(IsConnected));
+        }
+
+        private DelegateCommand? _disconnectCommand;
+        public  DelegateCommand  DisconnectCommand => _disconnectCommand ??= new DelegateCommand(Disconnect);
+
+        private void Disconnect()
+        {
+            _autoUdpClient.Disconnect();
+        }
+
+        private void AutoUdpClient_Disconnected(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(IsConnected));
+        }
+
+        #endregion
+
+        public ObservableCollection<string> ReceivedMessages { get; set; } = new();
+
 
         private void AutoUdpClient_DataReceived(object? sender, byte[] receiveBytes)
         {
@@ -99,11 +122,6 @@ namespace UdpDebugger
         private void AutoUdpClient_ErrorChanged(object? sender, string e)
         {
             ErrorMessage = e;
-        }
-
-        private void Disconnect()
-        {
-            _autoUdpClient.Disconnect();
         }
 
         #region 清除

@@ -28,7 +28,7 @@
                 Width="150"
                 IPAddress="{Binding LocalIp}"
                 InputMode="Fast"
-                IsEnabled="{Binding !Connected}"
+                IsEnabled="{Binding !IsConnected}"
                 ShowLeadingZero="False" />
 
             <TextBlock
@@ -38,9 +38,9 @@
             </TextBlock>
 
             <NumericUpDown
-                MinWidth="70"
+                MinWidth="80"
                 Increment="1"
-                IsEnabled="{Binding !Connected}"
+                IsEnabled="{Binding !IsConnected}"
                 Maximum="65535"
                 Minimum="1"
                 ParsingNumberStyle="Integer"
@@ -57,7 +57,7 @@
                 Width="150"
                 IPAddress="{Binding RemoteIp}"
                 InputMode="Fast"
-                IsEnabled="{Binding !Connected}"
+                IsEnabled="{Binding !IsConnected}"
                 ShowLeadingZero="False" />
 
             <TextBlock
@@ -67,20 +67,41 @@
             </TextBlock>
 
             <NumericUpDown
-                MinWidth="70"
+                MinWidth="80"
                 Increment="1"
-                IsEnabled="{Binding !Connected}"
+                IsEnabled="{Binding !IsConnected}"
                 Maximum="65535"
                 Minimum="1"
                 ParsingNumberStyle="Integer"
                 Value="{Binding Path=RemotePort}" />
 
 
-            <ToggleSwitch
+            <Button Command="{Binding StartTryingConnectCommand}">
+                连接
+            </Button>
+
+
+            <Button Command="{Binding DisconnectCommand}">
+                断开
+            </Button>
+
+
+            <Path
+                Width="24"
+                Height="24"
                 Margin="20,0,0,0"
-                IsChecked="{Binding Path=Connected}"
-                OffContent="已断开"
-                OnContent="已连接" />
+                Data="M1536 640c0 -424 -344 -768 -768 -768s-768 344 -768 768s344 768 768 768s768 -344 768 -768z"
+                Fill="Gray"
+                IsVisible="{Binding Path=!IsOpened}"
+                Stretch="Uniform" />
+            <Path
+                Width="24"
+                Height="24"
+                Margin="20,0,0,0"
+                Data="M1536 640c0 -424 -344 -768 -768 -768s-768 344 -768 768s344 768 768 768s768 -344 768 -768z"
+                Fill="Green"
+                IsVisible="{Binding Path=IsOpened}"
+                Stretch="Uniform" />
 
 
             <ComboBox

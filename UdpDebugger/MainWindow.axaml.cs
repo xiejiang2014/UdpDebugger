@@ -3,10 +3,12 @@ using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using PropertyChanged;
 using XieJiang.CommonModule.Ava;
 
 namespace UdpDebugger;
 
+[DoNotNotify]
 public partial class MainWindow : Window
 {
     private readonly MainWindowViewModel _mainWindowViewModel;
