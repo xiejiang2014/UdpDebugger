@@ -16,7 +16,26 @@
 
     <Grid RowDefinitions="Auto,*,Auto">
         <StackPanel Orientation="Horizontal">
-            <TextBlock VerticalAlignment="Center">本地 端口:</TextBlock>
+
+
+            <TextBlock
+                Margin="0,0,0,0"
+                VerticalAlignment="Center">
+                本地 IP:
+            </TextBlock>
+
+            <u:IPv4Box
+                Width="150"
+                IPAddress="{Binding LocalIp}"
+                InputMode="Fast"
+                IsEnabled="{Binding !Connected}"
+                ShowLeadingZero="False" />
+
+            <TextBlock
+                Margin="4,0,0,0"
+                VerticalAlignment="Center">
+                端口:
+            </TextBlock>
 
             <NumericUpDown
                 MinWidth="70"
@@ -35,7 +54,7 @@
             </TextBlock>
 
             <u:IPv4Box
-                Width="200"
+                Width="150"
                 IPAddress="{Binding RemoteIp}"
                 InputMode="Fast"
                 IsEnabled="{Binding !Connected}"

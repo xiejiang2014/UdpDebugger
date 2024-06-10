@@ -10,6 +10,8 @@ using System.Timers;
 using Avalonia.Controls.Notifications;
 using Avalonia.Platform.Storage;
 using Prism.Commands;
+using XieJiang.CommonModule;
+using XieJiang.CommonModule.Ava;
 
 namespace UdpDebugger
 {
@@ -19,12 +21,13 @@ namespace UdpDebugger
 
         public MainWindowViewModel()
         {
-            _autoUdpClient.DataReceived += _autoUdpClient_DataReceived;
-            _autoUdpClient.ErrorChanged += AutoUdpClientErrorChanged;
+            _autoUdpClient.DataReceived += AutoUdpClient_DataReceived;
+            _autoUdpClient.ErrorChanged += AutoUdpClient_ErrorChanged;
         }
 
         public string ErrorMessage { get; set; }
 
+        public IPAddress LocalIp   { get; set; } = IPAddress.Parse("127.0.0.1");
         public int       LocalPort  { get; set; } = 10000;
         public IPAddress RemoteIp   { get; set; } = IPAddress.Parse("127.0.0.1");
         public int       RemotePort { get; set; } = 10000;
@@ -68,6 +71,7 @@ namespace UdpDebugger
         {
             try
             {
+                _autoUdpClient.LocalIp    = LocalIp;
                 _autoUdpClient.LocalPort  = LocalPort;
                 _autoUdpClient.RemoteIp   = RemoteIp;
                 _autoUdpClient.RemotePort = RemotePort;
@@ -80,7 +84,7 @@ namespace UdpDebugger
             }
         }
 
-        private void _autoUdpClient_DataReceived(object? sender, byte[] receiveBytes)
+        private void AutoUdpClient_DataReceived(object? sender, byte[] receiveBytes)
         {
             if (DataViewType == DataViewTypes.Hex)
             {
@@ -92,7 +96,7 @@ namespace UdpDebugger
             }
         }
 
-        private void AutoUdpClientErrorChanged(object? sender, string e)
+        private void AutoUdpClient_ErrorChanged(object? sender, string e)
         {
             ErrorMessage = e;
         }

@@ -36,7 +36,10 @@
 		<PackageReference Include="Avalonia" Version="11.0.10" />
 		<PackageReference Include="Avalonia.Desktop" Version="11.0.10" />
 		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10" />
-		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10" />		<PackageReference Include="Irihi.Ursa" Version="0.3.0-beta20240518" />		<PackageReference Include="Irihi.Ursa.Themes.Semi" Version="0.3.0-beta20240518" />		<PackageReference Include="Prism.Core" Version="8.1.97" />
+		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.10" />		
+		<PackageReference Include="Irihi.Ursa" Version="0.3.0-beta20240518" />		
+		<PackageReference Include="Irihi.Ursa.Themes.Semi" Version="0.3.0-beta20240518" />		
+		<PackageReference Include="Prism.Core" Version="8.1.97" />
 
 		<PackageReference Include="Semi.Avalonia" Version="11.0.7.3" />
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
@@ -53,6 +56,8 @@
 
 	<ItemGroup>
 	  <Compile Include="..\..\..\MyRepository\xiejiang.CommonModule\AutoUdpClient.cs" Link="AutoUdpClient.cs" />
+	  <Compile Include="..\..\..\MyRepository\xiejiang.CommonModule\AvaloniaUI\Helper.cs" Link="Helper.cs" />
+	  <Compile Include="..\..\..\MyRepository\xiejiang.CommonModule\BytesExt.cs" Link="BytesExt.cs" />
 	</ItemGroup>
 
 </Project>
